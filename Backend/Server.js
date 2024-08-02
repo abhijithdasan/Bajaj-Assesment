@@ -8,14 +8,13 @@ const PORT = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(cors());
 
-// Helper function to separate numbers and alphabets
 const separateNumbersAndAlphabets = (data) => {
   const numbers = data.filter(item => !isNaN(item));
   const alphabets = data.filter(item => isNaN(item) && typeof item === 'string' && item.length === 1);
   return { numbers, alphabets };
 };
 
-// POST endpoint
+
 app.post('/bfhl', (req, res) => {
   try {
     const { data } = req.body;
@@ -28,10 +27,10 @@ app.post('/bfhl', (req, res) => {
       });
     }
 
-    // Extract user info from the data array
-    const emailInData = data.find(item => item.includes('@')); // Assuming email contains '@'
-    const userIdInData = data.find(item => !isNaN(item) && item.length > 0); // Example condition for userId
-    const rollNumberInData = data.find(item => typeof item === 'string' && item.length > 0); // Example condition for rollNumber
+   
+    const emailInData = data.find(item => item.includes('@')); 
+    const userIdInData = data.find(item => !isNaN(item) && item.length > 0); 
+    const rollNumberInData = data.find(item => typeof item === 'string' && item.length > 0); 
 
     const userId = userIdInData || 'N/A';
     const email = emailInData || 'N/A';
@@ -61,7 +60,7 @@ app.post('/bfhl', (req, res) => {
   }
 });
 
-// GET endpoint
+
 app.get('/bfhl', (req, res) => {
   res.status(200).json({ operation_code: 1 });
 });
