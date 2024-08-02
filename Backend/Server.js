@@ -27,21 +27,18 @@ app.post('/bfhl', (req, res) => {
     console.log('Received data:', data);
 
     if (!data || !Array.isArray(data)) {
-      return res.status(400).json({ 
-        is_success: false, 
-        user_id: userId, 
-        email,
-        roll_number: rollNumber,
-        message: 'Invalid input data: data field is missing or not an array' 
+      return res.status(400).json({
+        is_success: false,
+        message: 'Invalid input data: data field is missing or not an array'
       });
     }
 
     const { numbers, alphabets } = separateNumbersAndAlphabets(data);
-    
-    const highestAlphabet = alphabets.length ? 
-      [alphabets.reduce((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }) > 0 ? a : b)] : 
+
+    const highestAlphabet = alphabets.length ?
+      [alphabets.reduce((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }) > 0 ? a : b)] :
       [];
-    
+
     res.json({
       is_success: true,
       user_id: userId,
@@ -53,12 +50,9 @@ app.post('/bfhl', (req, res) => {
     });
   } catch (err) {
     console.error('Server Error:', err);
-    res.status(500).json({ 
-      is_success: false, 
-      user_id: userId, 
-      email,
-      roll_number: rollNumber,
-      message: 'Internal server error' 
+    res.status(500).json({
+      is_success: false,
+      message: 'Internal server error'
     });
   }
 });

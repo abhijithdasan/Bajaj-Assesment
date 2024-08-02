@@ -10,7 +10,9 @@ import {
   Typography,
   Snackbar,
   Alert,
+  Chip,
 } from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 import './App.css';
 
 function App() {
@@ -18,14 +20,17 @@ function App() {
   const [response, setResponse] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const API_URL = 'http://localhost:5000/bfhl';
+  const API_URL = 'https://bajaj-assesment-api.onrender.com/bfhl'; // Updated URL
 
   const handleSubmit = async () => {
+    setLoading(true);
+    setError('');
     try {
       const parsedData = JSON.parse(inputData);
 
-      const response = await fetch(API_URL, {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,12 +38,17 @@ function App() {
         body: JSON.stringify({ data: parsedData.data }),
       });
 
-      const responseData = await response.json();
+      if (!res.ok) {
+        throw new Error('API error');
+      }
+
+      const responseData = await res.json();
       setResponse(responseData);
-      setError('');
     } catch (error) {
-      setError('Invalid JSON input or API error');
+      setError(error.message || 'Invalid JSON input or API error');
       setResponse(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,19 +56,43 @@ function App() {
     setSelectedOptions(event.target.value);
   };
 
+  const handleDelete = (optionToDelete) => () => {
+    setSelectedOptions((prevOptions) =>
+      prevOptions.filter((option) => option !== optionToDelete)
+    );
+  };
+
   const renderResponse = () => {
     if (!response) return null;
 
-    let renderedResponse = {};
+    let renderedResponse = '';
 
-    selectedOptions.forEach(option => {
-      renderedResponse[option] = response[option];
-    });
+    if (selectedOptions.includes('is_success')) {
+      renderedResponse += `Is Success: ${response.is_success}\n`;
+    }
+    if (selectedOptions.includes('user_id')) {
+      renderedResponse += `User ID: ${response.user_id || 'N/A'}\n`;
+    }
+    if (selectedOptions.includes('email')) {
+      renderedResponse += `Email: ${response.email || 'N/A'}\n`;
+    }
+    if (selectedOptions.includes('roll_number')) {
+      renderedResponse += `Roll Number: ${response.roll_number || 'N/A'}\n`;
+    }
+    if (selectedOptions.includes('numbers')) {
+      renderedResponse += `Numbers: ${response.numbers.length ? response.numbers.join(', ') : 'N/A'}\n`;
+    }
+    if (selectedOptions.includes('alphabets')) {
+      renderedResponse += `Alphabets: ${response.alphabets.length ? response.alphabets.join(', ') : 'N/A'}\n`;
+    }
+    if (selectedOptions.includes('highest_alphabet')) {
+      renderedResponse += `Highest Alphabet: ${response.highest_alphabet.length ? response.highest_alphabet.join(', ') : 'N/A'}\n`;
+    }
 
     return (
       <Box mt={2}>
         <Typography variant="h6">Filtered Response:</Typography>
-        <pre>{JSON.stringify(renderedResponse, null, 2)}</pre>
+        <pre>{renderedResponse}</pre>
       </Box>
     );
   };
@@ -77,8 +111,14 @@ function App() {
         variant="outlined"
         margin="normal"
       />
-      <Button variant="contained" color="primary" onClick={handleSubmit} fullWidth>
-        Submit
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSubmit}
+        fullWidth
+        disabled={loading}
+      >
+        {loading ? 'Submitting...' : 'Submit'}
       </Button>
 
       {response && (
@@ -88,15 +128,26 @@ function App() {
             multiple
             value={selectedOptions}
             onChange={handleOptionChange}
-            renderValue={(selected) => selected.join(', ')}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip
+                    key={value}
+                    label={value}
+                    onDelete={handleDelete(value)}
+                    deleteIcon={<CloseIcon />}
+                  />
+                ))}
+              </Box>
+            )}
           >
-            <MenuItem value="is_success">is_success</MenuItem>
-            <MenuItem value="user_id">user_id</MenuItem>
-            <MenuItem value="email">email</MenuItem>
-            <MenuItem value="roll_number">roll_number</MenuItem>
-            <MenuItem value="numbers">numbers</MenuItem>
-            <MenuItem value="alphabets">alphabets</MenuItem>
-            <MenuItem value="highest_alphabet">highest_alphabet</MenuItem>
+            <MenuItem value="is_success">Is Success</MenuItem>
+            <MenuItem value="user_id">User ID</MenuItem>
+            <MenuItem value="email">Email</MenuItem>
+            <MenuItem value="roll_number">Roll Number</MenuItem>
+            <MenuItem value="numbers">Numbers</MenuItem>
+            <MenuItem value="alphabets">Alphabets</MenuItem>
+            <MenuItem value="highest_alphabet">Highest Alphabet</MenuItem>
           </Select>
         </FormControl>
       )}
