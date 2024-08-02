@@ -158,6 +158,7 @@ function App() {
         <Alert onClose={() => setError('')} severity="error" sx={{ width: '100%' }}>
           {error}
         </Alert>
+        
       </Snackbar>
     </Box>
   );
